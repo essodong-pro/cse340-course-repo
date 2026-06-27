@@ -1,0 +1,8 @@
+{
+    "ext": "js,css,ejs,env",
+    "exec": "node --env-file=\"[project-root]/.env\" \"[project-root]/server.js\"",
+    "ignore": [
+        ".git",
+        "node_modules"
+    ]
+}
