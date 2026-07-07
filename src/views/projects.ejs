@@ -4,10 +4,21 @@
         <h1>
             <%= title %>
         </h1>
+
         <ul>
-            <li>Park Cleanup - Join us to clean up local parks and make them beautiful!</li>
-            <li>Food Drive - Help collect and distribute food to those in need.</li>
-            <li>Community Tutoring - Volunteer to tutor students in various subjects.</li>
+            <% if (projects && projects.length> 0) { %>
+                <% projects.forEach(project=> { %>
+                    <% const dateOptions={ year: 'numeric' , month: 'long' , day: 'numeric' }; const formattedDate=new
+                        Date(project.date).toLocaleDateString('en-US', dateOptions); %>
+                        <li>
+                            <strong>
+                                <%= formattedDate %>
+                            </strong>: <%= project.title %> (<%= project.organization_name %>)
+                        </li>
+                        <% }); %>
+                            <% } else { %>
+                                <li>No upcoming service projects found.</li>
+                                <% } %>
         </ul>
     </main>
 
