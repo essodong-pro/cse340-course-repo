@@ -5,6 +5,7 @@ import path from "path";
 import { testConnection } from "./src/models/db.js";
 import { getAllOrganizations } from "./src/models/organizations.js";
 import { getAllProjects } from "./src/models/projects.js";
+import { getAllCategories } from "./src/models/categories.js";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -27,8 +28,17 @@ app.get("/", (req, res) => {
   res.render("home", { title: "Home" });
 });
 
-app.get("/categories", (req, res) => {
-  res.render("categories", { title: "Service Project Categories" });
+app.get("/categories", async (req, res) => {
+  try {
+    const categories = await getAllCategories();
+    res.render("categories", {
+      title: "Service Project Categories",
+      categories: categories
+    });
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).send("Error loading categories");
+  }
 });
 
 app.get("/organizations", async (req, res) => {

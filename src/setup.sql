@@ -1,7 +1,7 @@
 -- ========================================
 -- Organization Table
 -- ========================================
-DROP TABLE IF EXISTS organization;
+DROP TABLE IF EXISTS organization CASCADE;
 
 CREATE TABLE organization (
     organization_id SERIAL PRIMARY KEY,
@@ -22,7 +22,7 @@ INSERT INTO organization (name, description, contact_email, logo_filename) VALUE
 -- ========================================
 -- Service Projects Table
 -- ========================================
-DROP TABLE IF EXISTS service_project;
+DROP TABLE IF EXISTS service_project CASCADE;
 
 CREATE TABLE service_project (
     project_id SERIAL PRIMARY KEY,
@@ -56,3 +56,47 @@ INSERT INTO service_project (organization_id, title, description, location, date
 (3, 'Elderly Tech Support', 'Teaching senior citizens how to use computers.', 'Senior Living Center', '2026-09-14'),
 (3, 'Blanket Donation Drive', 'Collecting and distributing warm bedding.', 'Unity Hall', '2026-10-18'),
 (3, 'Park Litter Patrol', 'Cleaning up local recreational spaces.', 'Riverbank Park', '2026-11-02');
+
+-- ========================================
+-- Categories Table
+-- ========================================
+DROP TABLE IF EXISTS service_project_categories CASCADE;
+DROP TABLE IF EXISTS category CASCADE;
+
+CREATE TABLE category (
+    category_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- ========================================
+-- Junction Table: Service Project Categories
+-- ========================================
+CREATE TABLE service_project_categories (
+    project_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    PRIMARY KEY (project_id, category_id),
+    CONSTRAINT fk_project
+      FOREIGN KEY(project_id) 
+      REFERENCES service_project(project_id)
+      ON DELETE CASCADE,
+    CONSTRAINT fk_category
+      FOREIGN KEY(category_id) 
+      REFERENCES category(category_id)
+      ON DELETE CASCADE
+);
+
+-- ========================================
+-- Insert sample data: Categories
+-- ========================================
+INSERT INTO category (name) VALUES
+('Education'),
+('Infrastructure'),
+('Community Service');
+
+-- ========================================
+-- Associate Projects with Categories
+-- ========================================
+INSERT INTO service_project_categories (project_id, category_id) VALUES
+(1, 2), -- Community Center Renovation -> Infrastructure
+(1, 3), -- Community Center Renovation -> Community Service
+(13, 1); -- Elderly Tech Support -> Education
