@@ -1,14 +1,24 @@
-const db = require('../util/database');
+import pool from "./db.js";
 
-const getAllProjects = async () => {
-    const query = `
-        SELECT p.*, o.name AS organization_name 
-        FROM service_project p 
+export async function getAllProjects() {
+    const sql = `
+        SELECT 
+            p.project_id, 
+            p.title, 
+            p.description, 
+            p.location, 
+            p.date, 
+            o.name AS organization_name
+        FROM service_project p
         JOIN organization o ON p.organization_id = o.organization_id
         ORDER BY p.date ASC;
     `;
-    const [rows] = await db.execute(query);
-    return rows;
-};
 
-module.exports = { getAllProjects };
+    try {
+        const result = await pool.query(sql);
+        return result.rows;
+    } catch (error) {
+        console.error("Error in getAllProjects:", error);
+        throw error;
+    }
+}

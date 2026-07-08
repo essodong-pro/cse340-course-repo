@@ -6,19 +6,16 @@
         </h1>
 
         <ul>
-            <% if (projects && projects.length> 0) { %>
-                <% projects.forEach(project=> { %>
-                    <% const dateOptions={ year: 'numeric' , month: 'long' , day: 'numeric' }; const formattedDate=new
-                        Date(project.date).toLocaleDateString('en-US', dateOptions); %>
-                        <li>
-                            <strong>
-                                <%= formattedDate %>
-                            </strong>: <%= project.title %> (<%= project.organization_name %>)
-                        </li>
-                        <% }); %>
-                            <% } else { %>
-                                <li>No upcoming service projects found.</li>
-                                <% } %>
+            <% projects.forEach(project=> { %>
+                <% const formattedDate=new Date(project.date).toLocaleDateString('fr-FR', { year: 'numeric' ,
+                    month: 'long' , day: 'numeric' }); %>
+                    <li>
+                        <strong>
+                            <%= formattedDate %>:
+                        </strong>
+                        <%= project.title %> (<%= project.organization_name %>)
+                    </li>
+                    <% }); %>
         </ul>
     </main>
 
