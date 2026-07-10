@@ -22,3 +22,28 @@ export async function getAllProjects() {
         throw error;
     }
 }
+
+export async function getProjectsByOrganizationId(organizationId) {
+    const sql = `
+        SELECT
+          project_id,
+          organization_id,
+          title,
+          description,
+          location,
+          date
+        FROM service_project
+        WHERE organization_id = $1
+        ORDER BY date;
+    `;
+
+    const queryParams = [organizationId];
+
+    try {
+        const result = await pool.query(sql, queryParams);
+        return result.rows;
+    } catch (error) {
+        console.error("Error in getProjectsByOrganizationId:", error);
+        throw error;
+    }
+}
