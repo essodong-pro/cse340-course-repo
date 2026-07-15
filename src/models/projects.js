@@ -47,3 +47,53 @@ export async function getProjectsByOrganizationId(organizationId) {
         throw error;
     }
 }
+
+export async function getUpcomingProjects(numberOfProjects) {
+    const sql = `
+        SELECT 
+            p.project_id, 
+            p.title, 
+            p.description, 
+            p.date, 
+            p.location, 
+            p.organization_id, 
+            o.name AS organization_name
+        FROM service_project p
+        JOIN organization o ON p.organization_id = o.organization_id
+        WHERE p.date >= CURRENT_DATE
+        ORDER BY p.date ASC
+        LIMIT $1;
+    `;
+
+    try {
+        const result = await pool.query(sql, [numberOfProjects]);
+        return result.rows;
+    } catch (error) {
+        console.error("Error in getUpcomingProjects:", error);
+        throw error;
+    }
+}
+
+export async function getProjectDetails(id) {
+    const sql = `
+        SELECT 
+            p.project_id, 
+            p.title, 
+            p.description, 
+            p.date, 
+            p.location, 
+            p.organization_id, 
+            o.name AS organization_name
+        FROM service_project p
+        JOIN organization o ON p.organization_id = o.organization_id
+        WHERE p.project_id = $1;
+    `;
+
+    try {
+        const result = await pool.query(sql, [id]);
+        return result.rows[0];
+    } catch (error) {
+        console.error("Error in getProjectDetails:", error);
+        throw error;
+    }
+}
