@@ -16,7 +16,7 @@ export const getCategoryById = async (categoryId) => {
     const sql = 'SELECT * FROM category WHERE category_id = $1';
     try {
         const { rows } = await db.query(sql, [categoryId]);
-        return rows[0]; // Returns the single category object
+        return rows[0];
     } catch (error) {
         console.error("Error in getCategoryById:", error);
         throw error;
@@ -28,8 +28,8 @@ export const getCategoriesByProjectId = async (projectId) => {
     const sql = `
         SELECT c.category_id, c.name 
         FROM category c
-        JOIN project_category pc ON c.category_id = pc.category_id
-        WHERE pc.project_id = $1;
+        JOIN service_project_categories spc ON c.category_id = spc.category_id
+        WHERE spc.project_id = $1;
     `;
     try {
         const { rows } = await db.query(sql, [projectId]);
@@ -45,8 +45,8 @@ export const getProjectsByCategoryId = async (categoryId) => {
     const sql = `
         SELECT p.project_id, p.title 
         FROM service_project p
-        JOIN project_category pc ON p.project_id = pc.project_id
-        WHERE pc.category_id = $1;
+        JOIN service_project_categories spc ON p.project_id = spc.project_id
+        WHERE spc.category_id = $1;
     `;
     try {
         const { rows } = await db.query(sql, [categoryId]);
