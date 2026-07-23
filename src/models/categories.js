@@ -11,7 +11,6 @@ export const getAllCategories = async () => {
     }
 };
 
-// 1. Retrieve a single category by its ID
 export const getCategoryById = async (categoryId) => {
     const sql = 'SELECT * FROM category WHERE category_id = $1';
     try {
@@ -23,7 +22,6 @@ export const getCategoryById = async (categoryId) => {
     }
 };
 
-// 2. Retrieve all categories for a given service project
 export const getCategoriesByProjectId = async (projectId) => {
     const sql = `
         SELECT c.category_id, c.name 
@@ -40,7 +38,6 @@ export const getCategoriesByProjectId = async (projectId) => {
     }
 };
 
-// 3. Retrieve all service projects for a given category
 export const getProjectsByCategoryId = async (categoryId) => {
     const sql = `
         SELECT p.project_id, p.title 
@@ -53,6 +50,61 @@ export const getProjectsByCategoryId = async (categoryId) => {
         return rows;
     } catch (error) {
         console.error("Error in getProjectsByCategoryId:", error);
+        throw error;
+    }
+};
+
+// --- Category Assignment ---
+
+const assignCategoryToProject = async (categoryId, projectId) => {
+    const sql = `
+        INSERT INTO service_project_categories (category_id, project_id)
+        VALUES ($1, $2);
+    `;
+    await db.query(sql, [categoryId, projectId]);
+};
+
+export const updateCategoryAssignments = async (projectId, categoryIds) => {
+    const deleteSql = `
+        DELETE FROM service_project_categories
+        WHERE project_id = $1;
+    `;
+    await db.query(deleteSql, [projectId]);
+
+    for (const categoryId of categoryIds) {
+        await assignCategoryToProject(categoryId, projectId);
+    }
+};
+
+// --- New functions for Creating and Updating Categories ---
+
+/**
+ * Creates a new category in the database.
+ */
+export const createCategory = async (name) => {
+    const sql = 'INSERT INTO category (name) VALUES ($1) RETURNING category_id';
+    try {
+        const { rows } = await db.query(sql, [name]);
+        return rows[0].category_id;
+    } catch (error) {
+        console.error("Error in createCategory:", error);
+        throw error;
+    }
+};
+
+/**
+ * Updates an existing category in the database.
+ */
+export const updateCategory = async (categoryId, name) => {
+    const sql = 'UPDATE category SET name = $1 WHERE category_id = $2 RETURNING category_id';
+    try {
+        const { rows } = await db.query(sql, [name, categoryId]);
+        if (rows.length === 0) {
+            throw new Error(`Category with ID ${categoryId} not found.`);
+        }
+        return rows[0].category_id;
+    } catch (error) {
+        console.error("Error in updateCategory:", error);
         throw error;
     }
 };

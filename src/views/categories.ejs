@@ -3,6 +3,8 @@
     <main>
         <h1>Service Project Categories</h1>
 
+        <p><a href="/new-category">Add New Category</a></p>
+
         <% if (categories && categories.length> 0) { %>
             <ul>
                 <% categories.forEach(category=> { %>
@@ -10,6 +12,7 @@
                         <a href="/category/<%= category.category_id %>">
                             <%= category.name %>
                         </a>
+                        - <a href="/edit-category/<%= category.category_id %>">Edit</a>
                     </li>
                     <% }) %>
             </ul>
