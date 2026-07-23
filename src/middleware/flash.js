@@ -73,14 +73,12 @@ const flashMiddleware = (req, res, next) => {
 }
 
 /**
- * Make flash function available to all templates via res.locals
- * This middleware must run AFTER flashMiddleware
+ * Make flash messages available to all templates via res.locals
  */
 const flashLocals = (req, res, next) => {
-    // Attach the flash function to res.locals so templates can access it
-    // The function is NOT called here, just made available
-    // Messages are only consumed when a template calls flash()
-    res.locals.flash = req.flash;
+    // Automatically call req.flash() to pull all messages for this request
+    // and make them available as 'messages' in all EJS templates
+    res.locals.messages = req.flash();
     next();
 }
 
