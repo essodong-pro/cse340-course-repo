@@ -129,3 +129,11 @@ CREATE TABLE users (
     role_id INTEGER REFERENCES roles(role_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ========================================
+-- Insert Default Admin User
+-- ========================================
+-- Email: admin@example.com
+-- Password: cse340!
+INSERT INTO users (name, email, password_hash, role_id) VALUES 
+    ('System Administrator', 'admin@example.com', '$2b$10$3vV5q5F5Jv3q5F5Jv3q5Fu3vV5q5F5Jv3q5F5Jv3q5F5Jv3q5F5Ju', 2);
