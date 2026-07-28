@@ -5,28 +5,30 @@
             <%= title %>
         </h1>
 
-        <p><a href="/new-project">Add a New Service Project</a></p>
+        <% if (user && user.role_name==='admin' ) { %>
+            <p><a href="/new-project">Add a New Service Project</a></p>
+            <% } %>
 
-        <ul>
-            <% projects.forEach(project=> { %>
-                <% const formattedDate=new Date(project.date).toLocaleDateString('fr-FR', { year: 'numeric' ,
-                    month: 'long' , day: 'numeric' }); %>
+                <ul>
+                    <% projects.forEach(project=> { %>
+                        <% const formattedDate=new Date(project.date).toLocaleDateString('fr-FR', { year: 'numeric' ,
+                            month: 'long' , day: 'numeric' }); %>
 
-                    <li>
-                        <strong>
-                            <%= formattedDate %>:
-                        </strong>
+                            <li>
+                                <strong>
+                                    <%= formattedDate %>:
+                                </strong>
 
-                        <a href="/project/<%= project.project_id %>">
-                            <%= project.title %>
-                        </a>
+                                <a href="/project/<%= project.project_id %>">
+                                    <%= project.title %>
+                                </a>
 
-                        (<a href="/organization/<%= project.organization_id %>">
-                            <%= project.organization_name %>
-                        </a>)
-                    </li>
-                    <% }); %>
-        </ul>
+                                (<a href="/organization/<%= project.organization_id %>">
+                                    <%= project.organization_name %>
+                                </a>)
+                            </li>
+                            <% }); %>
+                </ul>
     </main>
 
     <%- include('partials/footer') %>
