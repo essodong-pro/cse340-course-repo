@@ -41,6 +41,18 @@ const findUserByEmail = async (email) => {
     return result.rows[0];
 };
 
+// --- Added to fetch all users for the admin list ---
+const getAllUsers = async () => {
+    const query = `
+        SELECT u.user_id, u.name, u.email, r.role_name 
+        FROM users u
+        JOIN roles r ON u.role_id = r.role_id
+        ORDER BY u.user_id ASC
+    `;
+    const result = await db.query(query);
+    return result.rows;
+};
+
 const verifyPassword = async (password, passwordHash) => {
     return bcrypt.compare(password, passwordHash);
 };
@@ -58,9 +70,8 @@ const authenticateUser = async (email, password) => {
         return null;
     }
 
-    // Remove the password hash before returning the user object
     delete user.password_hash;
     return user;
 };
 
-export { createUser, authenticateUser };
+export { createUser, authenticateUser, getAllUsers };

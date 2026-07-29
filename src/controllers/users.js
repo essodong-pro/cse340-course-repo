@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { createUser, authenticateUser } from '../models/users.js';
+import { createUser, authenticateUser, getAllUsers } from '../models/users.js';
 
 const showUserRegistrationForm = (req, res) => {
     res.render('register', { title: 'Register' });
@@ -9,14 +9,11 @@ const processUserRegistrationForm = async (req, res) => {
     const { name, email, password } = req.body;
 
     try {
-        // Hash the password before storing it
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
-        // Create the user in the database
         const userId = await createUser(name, email, passwordHash);
 
-        // Redirect to the home page after successful registration
         req.flash('success', 'Registration successful! Please log in.');
         res.redirect('/');
     } catch (error) {
@@ -36,7 +33,6 @@ const processLoginForm = async (req, res) => {
     try {
         const user = await authenticateUser(email, password);
         if (user) {
-            // Store user info in session
             req.session.user = user;
             req.flash('success', 'Login successful!');
 
@@ -75,19 +71,16 @@ const requireLogin = (req, res, next) => {
 
 const requireRole = (role) => {
     return (req, res, next) => {
-        // Check if user is logged in first
         if (!req.session || !req.session.user) {
             req.flash('error', 'You must be logged in to access this page.');
             return res.redirect('/login');
         }
 
-        // Check if user's role matches the required role
         if (req.session.user.role_name !== role) {
             req.flash('error', 'You do not have permission to access this page.');
             return res.redirect('/');
         }
 
-        // User has required role, continue
         next();
     };
 };
@@ -97,8 +90,24 @@ const showDashboard = (req, res) => {
     res.render('dashboard', {
         title: 'Dashboard',
         name: user.name,
-        email: user.email
+        email: user.email,
+        role: user.role_name // Added role here so it displays properly
     });
+};
+
+// --- Added controller to show the users list for admins ---
+const showUsersPage = async (req, res) => {
+    try {
+        const users = await getAllUsers();
+        res.render('users', {
+            title: 'Users List',
+            users
+        });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        req.flash('error', 'Unable to retrieve users list.');
+        res.redirect('/dashboard');
+    }
 };
 
 export {
@@ -109,5 +118,6 @@ export {
     processLogout,
     requireLogin,
     requireRole,
-    showDashboard
+    showDashboard,
+    showUsersPage
 };

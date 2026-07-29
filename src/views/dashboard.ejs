@@ -9,5 +9,11 @@
         </p>
         <p>Username: <%= email %>
         </p>
+        <p>Role: <%= role %>
+        </p>
+
+        <% if (role==='admin' ) { %>
+            <p><a href="/users">View Users List</a></p>
+            <% } %>
     </main>
     <%- include('partials/footer') %>
