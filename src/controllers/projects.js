@@ -1,4 +1,4 @@
-import { getUpcomingProjects, getProjectDetails, createProject, updateProject } from '../models/projects.js'; // Added updateProject
+import { getUpcomingProjects, getProjectDetails, createProject, updateProject, addVolunteer, removeVolunteer, isUserVolunteering } from '../models/projects.js';
 import { getCategoriesByProjectId } from '../models/categories.js';
 import { getAllOrganizations } from '../models/organizations.js';
 import { body, validationResult } from 'express-validator';
@@ -15,8 +15,14 @@ const showProjectDetailsPage = async (req, res) => {
     const projectId = req.params.id;
     const project = await getProjectDetails(projectId);
     const categories = await getCategoriesByProjectId(projectId);
+
+    let isVolunteering = false;
+    if (req.session && req.session.user) {
+        isVolunteering = await isUserVolunteering(req.session.user.user_id, projectId);
+    }
+
     const title = project ? project.title : 'Project Not Found';
-    res.render('project', { title, project, categories });
+    res.render('project', { title, project, categories, isVolunteering });
 };
 
 // --- New Functions for Inserting Projects ---
@@ -83,6 +89,41 @@ const processEditProjectForm = async (req, res) => {
     }
 };
 
+// --- Volunteer Controller Functions ---
+
+const volunteerForProject = async (req, res) => {
+    const projectId = req.params.id;
+    const userId = req.session.user.user_id;
+
+    try {
+        await addVolunteer(userId, projectId);
+        req.flash('success', 'You have successfully volunteered for this project!');
+    } catch (error) {
+        console.error('Error volunteering for project:', error);
+        req.flash('error', 'There was an error signing up as a volunteer.');
+    }
+    res.redirect(`/project/${projectId}`);
+};
+
+const unvolunteerForProject = async (req, res) => {
+    const projectId = req.params.id;
+    const userId = req.session.user.user_id;
+
+    try {
+        await removeVolunteer(userId, projectId);
+        req.flash('success', 'You have been removed as a volunteer for this project.');
+    } catch (error) {
+        console.error('Error removing volunteer status:', error);
+        req.flash('error', 'There was an error removing your volunteer status.');
+    }
+
+    // Check if request comes from dashboard or project details page
+    if (req.get('referrer') && req.get('referrer').includes('/dashboard')) {
+        return res.redirect('/dashboard');
+    }
+    res.redirect(`/project/${projectId}`);
+};
+
 const projectValidation = [
     body('title').trim().notEmpty().withMessage('Title is required')
         .isLength({ min: 3, max: 200 }).withMessage('Title must be between 3 and 200 characters'),
@@ -101,7 +142,9 @@ export {
     showProjectDetailsPage,
     showNewProjectForm,
     processNewProjectForm,
-    showEditProjectForm,     
-    processEditProjectForm,  
+    showEditProjectForm,
+    processEditProjectForm,
+    volunteerForProject,
+    unvolunteerForProject,
     projectValidation
 };

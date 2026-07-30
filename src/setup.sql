@@ -1,8 +1,17 @@
 -- ========================================
+-- Cleanup Existing Tables (Drop in reverse dependency order)
+-- ========================================
+DROP TABLE IF EXISTS project_volunteers CASCADE;
+DROP TABLE IF EXISTS service_project_categories CASCADE;
+DROP TABLE IF EXISTS category CASCADE;
+DROP TABLE IF EXISTS service_project CASCADE;
+DROP TABLE IF EXISTS organization CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS roles CASCADE;
+
+-- ========================================
 -- Organization Table
 -- ========================================
-DROP TABLE IF EXISTS organization CASCADE;
-
 CREATE TABLE organization (
     organization_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
@@ -11,9 +20,6 @@ CREATE TABLE organization (
     logo_filename VARCHAR(255) NOT NULL
 );
 
--- ========================================
--- Insert sample data: Organizations
--- ========================================
 INSERT INTO organization (name, description, contact_email, logo_filename) VALUES
 ('BrightFuture Builders', 'A nonprofit focused on improving community infrastructure through sustainable construction projects.', 'info@brightfuturebuilders.org', 'brightfuture-logo.png'),
 ('GreenHarvest Growers', 'An urban farming collective promoting food sustainability and education in local neighborhoods.', 'contact@greenharvest.org', 'greenharvest-logo.png'),
@@ -22,8 +28,6 @@ INSERT INTO organization (name, description, contact_email, logo_filename) VALUE
 -- ========================================
 -- Service Projects Table
 -- ========================================
-DROP TABLE IF EXISTS service_project CASCADE;
-
 CREATE TABLE service_project (
     project_id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
@@ -37,9 +41,6 @@ CREATE TABLE service_project (
       ON DELETE CASCADE
 );
 
--- ========================================
--- Insert sample data: Service Projects
--- ========================================
 INSERT INTO service_project (organization_id, title, description, location, date) VALUES
 (1, 'Community Center Renovation', 'Repairing the roof and painting the local center.', 'Downtown', '2026-08-15'),
 (1, 'Playground Safety Check', 'Ensuring equipment is secure for children.', 'City Park', '2026-09-01'),
@@ -60,9 +61,6 @@ INSERT INTO service_project (organization_id, title, description, location, date
 -- ========================================
 -- Categories Table
 -- ========================================
-DROP TABLE IF EXISTS service_project_categories CASCADE;
-DROP TABLE IF EXISTS category CASCADE;
-
 CREATE TABLE category (
     category_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
@@ -85,35 +83,25 @@ CREATE TABLE service_project_categories (
       ON DELETE CASCADE
 );
 
--- ========================================
--- Insert sample data: Categories
--- ========================================
 INSERT INTO category (name) VALUES
 ('Education'),
 ('Infrastructure'),
 ('Community Service');
 
--- ========================================
--- Associate Projects with Categories
--- ========================================
 INSERT INTO service_project_categories (project_id, category_id) VALUES
-(1, 2), -- Community Center Renovation -> Infrastructure
-(1, 3), -- Community Center Renovation -> Community Service
-(13, 1); -- Elderly Tech Support -> Education
+(1, 2), 
+(1, 3), 
+(13, 1); 
 
 -- ========================================
 -- Roles Table (Authentication & RBAC)
 -- ========================================
-DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS roles CASCADE;
-
 CREATE TABLE roles (
     role_id SERIAL PRIMARY KEY,
     role_name VARCHAR(50) UNIQUE NOT NULL,
     role_description TEXT
 );
 
--- Insert initial role data
 INSERT INTO roles (role_name, role_description) VALUES 
     ('user', 'Standard user with basic access'),
     ('admin', 'Administrator with full system access');
@@ -130,10 +118,25 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ========================================
 -- Insert Default Admin User
--- ========================================
 -- Email: admin@example.com
 -- Password: cse340!
 INSERT INTO users (name, email, password_hash, role_id) VALUES 
-    ('admin@example.com', 'admin@example.com', '$2b$10$3vV5q5F5Jv3q5F5Jv3q5Fu3vV5q5F5Jv3q5F5Jv3q5F5Jv3q5F5Ju', 2);
+    ('Admin User', 'admin@example.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 2);
+
+-- ========================================
+-- Junction Table: Project Volunteers (Many-to-Many)
+-- ========================================
+CREATE TABLE project_volunteers (
+    user_id INTEGER NOT NULL,
+    project_id INTEGER NOT NULL,
+    PRIMARY KEY (user_id, project_id),
+    CONSTRAINT fk_volunteer_user
+        FOREIGN KEY(user_id) 
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_volunteer_project
+        FOREIGN KEY(project_id) 
+        REFERENCES service_project(project_id)
+        ON DELETE CASCADE
+);

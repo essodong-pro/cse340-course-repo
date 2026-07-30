@@ -15,5 +15,27 @@
         <% if (role==='admin' ) { %>
             <p><a href="/users">View Users List</a></p>
             <% } %>
+
+                <section class="volunteered-projects-section" style="margin-top: 30px;">
+                    <h3>Projects You Are Volunteering For</h3>
+                    <% if (locals.volunteeredProjects && volunteeredProjects.length> 0) { %>
+                        <ul class="project-list">
+                            <% volunteeredProjects.forEach(project=> { %>
+                                <li
+                                    style="margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <strong><a href="/project/<%= project.project_id %>">
+                                            <%= project.title %>
+                                        </a></strong><br>
+                                    <span>Organization: <%= project.organization_name %></span><br>
+                                    <span>Date: <%= project.date.toDateString() %></span><br>
+                                    <a href="/project/<%= project.project_id %>/unvolunteer"
+                                        style="color: red; font-size: 0.9em;">Remove Volunteer Status</a>
+                                </li>
+                                <% }) %>
+                        </ul>
+                        <% } else { %>
+                            <p>You have not signed up to volunteer for any projects yet.</p>
+                            <% } %>
+                </section>
     </main>
     <%- include('partials/footer') %>

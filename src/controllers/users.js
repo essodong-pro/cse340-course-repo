@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import { createUser, authenticateUser, getAllUsers } from '../models/users.js';
+import { getUserVolunteeredProjects } from '../models/projects.js';
 
 const showUserRegistrationForm = (req, res) => {
     res.render('register', { title: 'Register' });
@@ -85,14 +86,28 @@ const requireRole = (role) => {
     };
 };
 
-const showDashboard = (req, res) => {
+const showDashboard = async (req, res) => {
     const user = req.session.user;
-    res.render('dashboard', {
-        title: 'Dashboard',
-        name: user.name,
-        email: user.email,
-        role: user.role_name // Added role here so it displays properly
-    });
+    try {
+        const volunteeredProjects = await getUserVolunteeredProjects(user.user_id);
+        res.render('dashboard', {
+            title: 'Dashboard',
+            name: user.name,
+            email: user.email,
+            role: user.role_name,
+            volunteeredProjects
+        });
+    } catch (error) {
+        console.error('Error loading dashboard volunteered projects:', error);
+        req.flash('error', 'Unable to retrieve your volunteered projects.');
+        res.render('dashboard', {
+            title: 'Dashboard',
+            name: user.name,
+            email: user.email,
+            role: user.role_name,
+            volunteeredProjects: []
+        });
+    }
 };
 
 // --- Added controller to show the users list for admins ---

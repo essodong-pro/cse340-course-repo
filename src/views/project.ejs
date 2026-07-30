@@ -27,11 +27,25 @@
                 <% }); %>
         </ul>
 
-        <% if (user && user.role_name==='admin' ) { %>
-            <p>
-                <a href="/edit-project/<%= project.project_id %>">Edit Project</a> |
-                <a href="/assign-categories/<%= project.project_id %>">Edit Categories</a>
-            </p>
+        <!-- Volunteer Section -->
+        <% if (locals.user) { %>
+            <div class="volunteer-section"
+                style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+                <% if (isVolunteering) { %>
+                    <p>You are volunteering for this project. <a href="/project/<%= project.project_id %>/unvolunteer"
+                            class="button" style="margin-left: 10px; color: red;">Remove Volunteer Status</a></p>
+                    <% } else { %>
+                        <p><a href="/project/<%= project.project_id %>/volunteer" class="button">Volunteer for this
+                                Project</a></p>
+                        <% } %>
+            </div>
             <% } %>
+
+                <% if (user && user.role_name==='admin' ) { %>
+                    <p>
+                        <a href="/edit-project/<%= project.project_id %>">Edit Project</a> |
+                        <a href="/assign-categories/<%= project.project_id %>">Edit Categories</a>
+                    </p>
+                    <% } %>
     </main>
     <%- include('partials/footer') %>

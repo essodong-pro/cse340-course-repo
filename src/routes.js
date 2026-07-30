@@ -12,7 +12,9 @@ import {
     processNewProjectForm,
     projectValidation,
     showEditProjectForm,
-    processEditProjectForm
+    processEditProjectForm,
+    volunteerForProject,
+    unvolunteerForProject
 } from './controllers/projects.js';
 import {
     showCategoriesPage,
@@ -34,7 +36,7 @@ import {
     requireLogin,
     requireRole,
     showDashboard,
-    showUsersPage 
+    showUsersPage
 } from './controllers/users.js';
 import { testErrorPage } from './controllers/errors.js';
 
@@ -59,6 +61,10 @@ router.get('/project/:id', showProjectDetailsPage);
 // --- Edit Project Routes ---
 router.get('/edit-project/:id', requireRole('admin'), showEditProjectForm);
 router.post('/edit-project/:id', requireRole('admin'), projectValidation, processEditProjectForm);
+
+// --- Project Volunteer Routes ---
+router.get('/project/:id/volunteer', requireLogin, volunteerForProject);
+router.get('/project/:id/unvolunteer', requireLogin, unvolunteerForProject);
 
 // --- Category Routes ---
 router.get('/categories', showCategoriesPage);

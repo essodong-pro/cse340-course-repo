@@ -3,12 +3,23 @@ import bcrypt from 'bcrypt';
 
 const createUser = async (name, email, passwordHash) => {
     const default_role = 'user';
+
+    // First, explicitly fetch the role_id to ensure the role exists
+    const roleQuery = 'SELECT role_id FROM roles WHERE role_name = $1';
+    const roleResult = await db.query(roleQuery, [default_role]);
+
+    if (roleResult.rows.length === 0) {
+        throw new Error(`Default role '${default_role}' does not exist in the roles table.`);
+    }
+
+    const roleId = roleResult.rows[0].role_id;
+
     const query = `
         INSERT INTO users (name, email, password_hash, role_id) 
-        VALUES ($1, $2, $3, (SELECT role_id FROM roles WHERE role_name = $4)) 
+        VALUES ($1, $2, $3, $4) 
         RETURNING user_id
     `;
-    const queryParams = [name, email, passwordHash, default_role];
+    const queryParams = [name, email, passwordHash, roleId];
 
     const result = await db.query(query, queryParams);
 

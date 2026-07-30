@@ -155,3 +155,72 @@ export async function updateProject(projectId, title, description, location, dat
         throw error;
     }
 }
+
+// ========================================
+// Volunteer Model Functions
+// ========================================
+
+export async function addVolunteer(userId, projectId) {
+    const sql = `
+        INSERT INTO project_volunteers (user_id, project_id)
+        VALUES ($1, $2)
+        ON CONFLICT (user_id, project_id) DO NOTHING;
+    `;
+    try {
+        await pool.query(sql, [userId, projectId]);
+    } catch (error) {
+        console.error("Error in addVolunteer:", error);
+        throw error;
+    }
+}
+
+export async function removeVolunteer(userId, projectId) {
+    const sql = `
+        DELETE FROM project_volunteers
+        WHERE user_id = $1 AND project_id = $2;
+    `;
+    try {
+        await pool.query(sql, [userId, projectId]);
+    } catch (error) {
+        console.error("Error in removeVolunteer:", error);
+        throw error;
+    }
+}
+
+export async function getUserVolunteeredProjects(userId) {
+    const sql = `
+        SELECT 
+            p.project_id, 
+            p.title, 
+            p.description, 
+            p.location, 
+            p.date, 
+            o.name AS organization_name
+        FROM project_volunteers pv
+        JOIN service_project p ON pv.project_id = p.project_id
+        JOIN organization o ON p.organization_id = o.organization_id
+        WHERE pv.user_id = $1
+        ORDER BY p.date ASC;
+    `;
+    try {
+        const result = await pool.query(sql, [userId]);
+        return result.rows;
+    } catch (error) {
+        console.error("Error in getUserVolunteeredProjects:", error);
+        throw error;
+    }
+}
+
+export async function isUserVolunteering(userId, projectId) {
+    const sql = `
+        SELECT 1 FROM project_volunteers
+        WHERE user_id = $1 AND project_id = $2;
+    `;
+    try {
+        const result = await pool.query(sql, [userId, projectId]);
+        return result.rows.length > 0;
+    } catch (error) {
+        console.error("Error in isUserVolunteering:", error);
+        throw error;
+    }
+}
